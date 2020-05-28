@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import scipy.stats
 import logging
 logging.getLogger("kamene.runtime").setLevel(logging.ERROR)
-import kamene.all as scapy                # kamene je dio scapy-ja kompatibilan s python 3.x verzijama
+import kamene.all as scapy                # kamene is a part of scapy library compatible with python3.XX versions
 from pcapng import FileScanner
 import warnings
 import random
@@ -26,7 +26,7 @@ def find_distribution(data, _type):
             distribution_results.append((dist_name, p))
         except:
             continue
-    # izaberi najprikladniju distribuciju
+    # determine optimal distribution
     best_dist, best_p = (max(distribution_results, key=lambda item: item[1]))
     print("Optimal distribution for " + str(_type) + ": " + str(best_dist))
     print("Optimal p value: " + str(best_p))
@@ -50,18 +50,18 @@ def load_data(filename):
                 packet_arrival_durations.append(timestamp - start_timestamp)
                 start_timestamp = timestamp
                 cnt += 1
-    # prva vrijednost je outlier pa nju zanemarujemo
+    # first value is an outlier which we discard
     packet_arrival_durations = packet_arrival_durations[1:]
     return packet_sizes, packet_arrival_durations
 
 
 def scapy_generate(protocol, service, size_params, duration_params, port, timer):
-    # velicina paketa po distribuciji stanja - size
+    # packet size per optimal distribution
     if service == "video" or "radio":
         size = int(scipy.stats.cauchy.rvs(loc=size_params[0], scale=size_params[1]))
     elif service == "game":
         size = int(scipy.stats.beta.rvs(a=size_params[0], b=size_params[1], loc=size_params[2], scale=size_params[3]))
-    # trajanje usluge po distribuciji stanja - duration
+    # duration of service per optimal distribution
     if service == "video" or service == "game":
         duration = scipy.stats.arcsine.rvs(loc=duration_params[0], scale=duration_params[1])
         if duration > 30:
@@ -82,10 +82,10 @@ def scapy_generate(protocol, service, size_params, duration_params, port, timer)
     else:
         packet = scapy.IP(dst='8.0.0.1')/scapy.Raw(data)
     scapy.send(packet, verbose=0)
-    # time.sleep(duration)
+    time.sleep(duration)
     return timer
 
-
+# class representing a simple Markov chain
 class markovChain():
 
     def __init__(self, transitions1, transitions2, transitions3, start_state):
@@ -181,7 +181,7 @@ if __name__ == '__main__':
 
     chain = markovChain(video_transitions, radio_transitions, game_transitions, starting_state)
 
-    protocol = "ip"                     # IP ili UDP
+    protocol = "ip"                     # IP or UDP
     lowercase = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u',
                  'v', 'z', 'x', 'y', 'w']
     port = 80
